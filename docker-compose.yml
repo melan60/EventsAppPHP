@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  php:
+    container_name: projet_symfony_php
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/var/www
+    ports:
+      - "8000:8000"
+
+volumes:
+  data_db:
