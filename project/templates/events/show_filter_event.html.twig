@@ -1,0 +1,60 @@
+{# templates/event/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Event List{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Event List</h1>
+
+    <form method="get" action="{{ path('list_events') }}">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <input type="text" name="title" class="form-control" placeholder="Title" value="{{ app.request.query.get('title') }}">
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="date" class="form-control" value="{{ app.request.query.get('date') }}">
+            </div>
+            <div class="col-md-3">
+                <select name="placesRemaining" class="form-control">
+                    <option value="">Has Available Places</option>
+                    <option value="1" {{ app.request.query.get('placesRemaining') == '1' ? 'selected' : '' }}>Yes</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="isPublic" class="form-control">
+                    <option value="">Public/Private</option>
+                    <option value="1" {{ app.request.query.get('isPublic') == '1' ? 'selected' : '' }}>Public</option>
+                    <option value="0" {{ app.request.query.get('isPublic') == '0' ? 'selected' : '' }}>Private</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+    <div class="row mt-4">
+        {% for event in events %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ event.title }}</h5>
+                        <p class="card-text">{{ event.description }}</p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Date: {{ event.date|date('Y-m-d H:i') }}<br>
+                                Max Participants: {{ event.participantsNumber }}<br>
+                                Public: {{ event.isPublic ? 'Yes' : 'No' }}
+                            </small>
+                        </p>
+                        <a href="{{ path('event_show', {id: event.id}) }}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <p>No events found.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

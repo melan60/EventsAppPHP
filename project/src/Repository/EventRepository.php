@@ -16,6 +16,34 @@ class EventRepository extends ServiceEntityRepository
         parent::__construct($registry, Event::class);
     }
 
+    public function findByFilters($title, $date, $placesRemaining, $isPublic)
+    {
+        $qb = $this->createQueryBuilder('e');
+
+        if ($title) {
+            $qb->andWhere('e.title LIKE :title')
+               ->setParameter('title', '%' . $title . '%');
+        }
+
+        if ($date) {
+            $qb->andWhere('e.date = :date')
+               ->setParameter('date', new \DateTime($date));
+        }
+
+        if ($placesRemaining) {
+            $qb->leftJoin('e.participants', 'p')
+               ->groupBy('e.id')
+               ->having('COUNT(p.id) < e.participants_number');
+        }
+
+        if ($isPublic !== null  && $isPublic !== '') {
+            $qb->andWhere('e.public = :public')
+               ->setParameter('public', $isPublic === '1');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return Event[] Returns an array of Event objects
     //     */
