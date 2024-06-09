@@ -10,9 +10,22 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 
 class EventsController extends AbstractController {
+
+    #[Route('/', name: 'app_homepage')]
+    public function homepage(EventRepository $repo): Response
+    {
+        $user = $this->getUser(); // Obtenir l'utilisateur authentifié
+
+        return $this->render('events/home.html.twig', [
+            'user' => $user,
+            'events' => $repo->findAll()
+        ]);
+    }
+
     #[Route('/home', name: 'home')]
     public function index(EventRepository $repo): Response {
         return $this->render('events/home.html.twig', [
+            'user' => null,
             'events' => $repo->findAll()
         ]);
     }

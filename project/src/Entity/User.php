@@ -34,9 +34,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Event::class, mappedBy: 'participants')]
     private $events;
 
-    #[ORM\Column]
-    private bool $isVerified = false;
-
     public function __construct() {
         $this->events = new ArrayCollection();
     }
@@ -125,18 +122,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return (string) $this->id;
-    }
-
-    public function isVerified(): bool
-    {
-        return $this->isVerified;
-    }
-
-    public function setVerified(bool $isVerified): static
-    {
-        $this->isVerified = $isVerified;
-
-        return $this;
+        return $this->email;
     }
 }

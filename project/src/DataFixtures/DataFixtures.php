@@ -17,8 +17,7 @@ class DataFixtures extends Fixture
         $this->passwordHasher = $passwordHasher;
     }
 
-    public function load(ObjectManager $manager)
-    {
+    public function load(ObjectManager $manager) {
         // Create some users
         for ($i = 1; $i <= 5; $i++) {
             $user = new User();
@@ -26,7 +25,6 @@ class DataFixtures extends Fixture
             $user->setPrenom('Prenom' . $i);
             $user->setEmail('user' . $i . '@example.com');
             $user->setPassword($this->passwordHasher->hashPassword($user, 'password' . $i));
-
             $manager->persist($user);
         }
 

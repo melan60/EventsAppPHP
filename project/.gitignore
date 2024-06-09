@@ -1,4 +1,3 @@
-
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -8,3 +7,15 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+# Ignore everything in var/ except var/data.db
+/var/*
+!/var/data.db
+
+# Ignore IDE specific files
+/.idea/
+/.vscode/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
