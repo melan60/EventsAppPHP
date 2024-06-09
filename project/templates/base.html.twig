@@ -21,7 +21,7 @@
                 <ul class="navbar-nav ms-auto">
                     {% if app.user %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">{{ app.user.prenom }} {{ app.user.nom }}</a>
+                            <a class="nav-link" href="{{ path('user_profile') }}">{{ app.user.prenom }} {{ app.user.nom }}</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('app_logout') }}">Logout</a>

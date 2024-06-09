@@ -122,6 +122,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function __toString() : String {
+        return $this->prenom.' '.$this->nom. ' '. $this->email. ' ' .$this->password;
+    }
+
     public function getRoles(): array
     {
         return ['ROLE_USER'];

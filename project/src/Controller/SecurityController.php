@@ -18,12 +18,7 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 class SecurityController extends AbstractController
 {
     #[Route(path: '/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
-    {
-        // if ($this->getUser()) {
-        //     return $this->redirectToRoute('target_path');
-        // }
-
+    public function login(AuthenticationUtils $authenticationUtils): Response {
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
         // last username entered by the user
@@ -33,8 +28,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(): void
-    {
+    public function logout(): void {
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
@@ -56,11 +50,9 @@ class SecurityController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // Dispatch the login event to authenticate the user
             $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
             $this->container->get('security.token_storage')->setToken($token);
 
-            // Dispatch the login event
             $event = new InteractiveLoginEvent($request, $token);
             $eventDispatcher->dispatch($event);
 

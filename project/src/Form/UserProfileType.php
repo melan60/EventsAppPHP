@@ -1,9 +1,10 @@
 <?php
 
-// src/Form/RegistrationFormType.php
 namespace App\Form;
 
+use App\Entity\Event;
 use App\Entity\User;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -13,11 +14,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email;
-use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 
-class UserType extends AbstractType
+class UserProfileType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -48,7 +49,7 @@ class UserType extends AbstractType
                     ])
                 ],
             ])
-            ->add('plainPassword', RepeatedType::class, [
+            ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'mapped' => false,
                 'required' => true,
@@ -80,10 +81,11 @@ class UserType extends AbstractType
                 ],
                 'invalid_message' => 'Les champs de mot de passe doivent correspondre.',
             ])
-            ->add('register', SubmitType::class, [
-                'label' => 'Inscription',
+            ->add('save', SubmitType::class, [
+                'label' => 'Sauvegarder les modifications',
                 'attr' => ['class' => 'btn btn-primary btn-block']
             ]);
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -93,4 +95,3 @@ class UserType extends AbstractType
         ]);
     }
 }
-
