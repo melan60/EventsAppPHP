@@ -54,6 +54,10 @@ class Event
         return $this;
     }
 
+    public function hasRemainingPlaces(): bool {
+        return $this->participants->count() < $this->participants_number;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

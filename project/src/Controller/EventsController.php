@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Form\EventType;
 use App\Repository\EventRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
@@ -39,6 +40,26 @@ class EventsController extends AbstractController {
         }
         return $this->render('events/new.html.twig', [
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/events/inscription/{id}', name: 'event_inscription')]
+    public function inscription(Event $event, UserRepository $repo, EntityManagerInterface $entityManager): Response {
+        $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
+        $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
+
+        if($event->hasRemainingPlaces() and $user) {
+            $event->addParticipant($user);
+            $user->addEvent($event);
+            $entityManager->persist($user);
+            $entityManager->persist($event);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('user_events');
+        }
+
+        return $this->render('events/show.html.twig', [
+            'event' => $event,
         ]);
     }
 
