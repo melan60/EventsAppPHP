@@ -51,7 +51,7 @@ class UserController extends AbstractController {
         ]);
     }
 
-    #[Route('/user-events', name: 'user_events')]
+    #[Route('/user/events', name: 'user_events')]
     public function myEvent(): Response
     {
         $user = $this->container->get('security.token_storage')->getToken()->getUser();
