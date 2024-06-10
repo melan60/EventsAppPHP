@@ -19,6 +19,17 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                            Évènements
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="/events">Liste</a>
+                            <a class="dropdown-item" href="/events/new">Nouveau</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                        </div>
+                    </li>
                     {% if app.user %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('user_profile') }}">{{ app.user.prenom }} {{ app.user.nom }}</a>
