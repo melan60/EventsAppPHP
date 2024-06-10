@@ -27,6 +27,8 @@ Ceci est un projet Symfony qui utilise une base de données SQLite.
    ```bash
    docker exec -it projet_symfony_php bash
    cd project
+   wget https://get.symfony.com/cli/installer -O - | bash
+   export PATH="$HOME/.symfony5/bin:$PATH"
    ```
    
 4. Installer les dépendances :
