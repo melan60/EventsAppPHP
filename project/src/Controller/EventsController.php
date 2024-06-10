@@ -7,6 +7,7 @@ use App\Form\EventType;
 use App\Repository\EventRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -42,8 +43,10 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/events/{id}', name: 'event_show')]
-    public function show(Event $event): Response
-    {
+    public function show(Event $event): Response {
+        // Vérification des accès
+        $this->denyAccessUnlessGranted('view_details_event', $event);
+
         return $this->render('events/show.html.twig', [
             'event' => $event,
         ]);
@@ -57,12 +60,19 @@ class EventsController extends AbstractController {
         $placesRemaining = $request->query->get('placesRemaining');
         $isPublic = $request->query->get('isPublic');
 
+        $page = $request->query->getInt('page', 1);
+        $limit = 5;
+
         // ?pb va retourner un event qui correspond au critères exact pb pour date 
-        $events = $repo->findByFilters($title, $date, $placesRemaining, $isPublic);
-
+        $events_pagination = $repo->findByFilters($title, $date, $placesRemaining, $isPublic, $page, $limit);
+        $totalItems = count($events_pagination);
+        $pagesCount = ceil($totalItems / $limit);
+        // 'events' => $repo->findAllPagination(1, 3)
         return $this->render('events/show_filter_event.html.twig', [
-            'events' => $events,
-
+            'events' => $events_pagination,
+            'totalItems' => $totalItems,
+            'pagesCount' => $pagesCount,
+            'currentPage' => $page,
         ]);
     }
 }

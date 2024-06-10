@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Event;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * @extends ServiceEntityRepository<Event>
@@ -16,8 +17,16 @@ class EventRepository extends ServiceEntityRepository
         parent::__construct($registry, Event::class);
     }
 
-    public function findByFilters($title, $date, $placesRemaining, $isPublic)
-    {
+    public function findAllPagination(int $page, int $limit): Paginator {
+        $query = $this->createQueryBuilder('r')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->getQuery();
+
+        return new Paginator($query, true);
+    }
+
+    public function findByFilters($title, $date, $placesRemaining, $isPublic, $page, $limit): Paginator {
         $qb = $this->createQueryBuilder('e');
 
         if ($title) {
@@ -41,7 +50,11 @@ class EventRepository extends ServiceEntityRepository
                ->setParameter('public', $isPublic === '1');
         }
 
-        return $qb->getQuery()->getResult();
+        $qb->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->getQuery();
+
+        return new Paginator($qb, true);
     }
 
     //    /**
