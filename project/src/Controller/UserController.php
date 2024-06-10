@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\Event;
 use App\Form\UserProfileType;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -47,6 +48,19 @@ class UserController extends AbstractController {
         return $this->render('user/profile.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/user-events', name: 'user_events')]
+    public function myEvent(): Response
+    {
+        $user = $this->container->get('security.token_storage')->getToken()->getUser();
+        if (!$user) {
+            throw $this->createAccessDeniedException('You must be logged in to view your events.');
+        }
+        $events = $user->getEvents();
+        return $this->render('user/user_events.html.twig', [
+            'events' => $events,
         ]);
     }
 }
