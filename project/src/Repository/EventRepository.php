@@ -6,6 +6,7 @@ use App\Entity\Event;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Doctrine\ORM\Query\Expr;
 
 /**
  * @extends ServiceEntityRepository<Event>
@@ -35,12 +36,22 @@ class EventRepository extends ServiceEntityRepository
         }
 
         if ($date) {
-            $qb->andWhere('e.date = :date')
-               ->setParameter('date', new \DateTime($date));
+            $dateTime = new \DateTime($date);
+            $startDate = (clone $dateTime)->setTime(0, 0, 0);
+            $endDate = (clone $dateTime)->setTime(23, 59, 59);
+
+            $qb->andWhere($qb->expr()->between('e.date', ':startDate', ':endDate'))
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate);
+            
         }
 
         if ($placesRemaining) {
-            $qb->leftJoin('e.participants', 'p')
+            //récupérer la date du jour
+            $today = new \DateTime();            
+            $qb->andWhere('e.date > :today')
+               ->setParameter('today', $today)
+               ->leftJoin('e.participants', 'p')
                ->groupBy('e.id')
                ->having('COUNT(p.id) < e.participants_number');
         }
