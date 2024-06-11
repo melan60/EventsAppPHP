@@ -11,9 +11,8 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">{{ event.title }}</h5>
-                        <p class="card-text">{{ event.description }}</p>
                         <p class="card-text"><small class="text-muted">{{ event.date|date('Y-m-d H:i') }}</small></p>
-                        <p class="card-text">Max Participants: {{ event.participantsNumber }}</p>
+                        <p class="card-text">Participants: {{event.getRemainingPlaces()}} / {{ event.participantsNumber }}</p>
                         <p class="card-text">Public: {{ event.public ? 'Yes' : 'No' }}</p>
                         <a href="{{ path('event_show', { id: event.id }) }}" class="btn btn-primary">View Details</a>
                     </div>
