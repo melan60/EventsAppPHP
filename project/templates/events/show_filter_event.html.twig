@@ -5,12 +5,12 @@
 
 {% block body %}
 <div class="container">
-    <h1>Event List</h1>
+    <h1>Liste des Événements</h1>
 
     <form method="get" action="{{ path('list_events') }}">
         <div class="row mb-4">
             <div class="col-md-3">
-                <input type="text" name="title" class="form-control" placeholder="Title" value="{{ app.request.query.get('title') }}">
+                <input type="text" name="title" class="form-control" placeholder="Titre" value="{{ app.request.query.get('title') }}">
             </div>
             <div class="col-md-3">
                 <input type="date" name="date" class="form-control" value="{{ app.request.query.get('date') }}">
@@ -18,13 +18,13 @@
             <div class="col-md-3">
                 <select name="placesRemaining" class="form-control">
                     <option value="">Tous les événements</option>
-                    <option value="1" {{ app.request.query.get('placesRemaining') == '1' ? 'selected' : '' }}>Place disponible</option>
+                    <option value="1" {{ app.request.query.get('placesRemaining') == '1' ? 'selected' : '' }}>Places disponibles</option>
                 </select>
             </div>
             <div class="col-md-3">
                 <select name="isPublic" class="form-control">
-                    <option value="">Publique/Privé</option>
-                    <option value="1" {{ app.request.query.get('isPublic') == '1' ? 'selected' : '' }}>Publique</option>
+                    <option value="">Public / Privé</option>
+                    <option value="1" {{ app.request.query.get('isPublic') == '1' ? 'selected' : '' }}>Public</option>
                     <option value="0" {{ app.request.query.get('isPublic') == '0' ? 'selected' : '' }}>Privé</option>
                 </select>
             </div>
@@ -45,10 +45,10 @@
                                 </small>
                             </p>
                             <p class="card-text">
-                                    Participants: {{event.getRemainingPlaces()}} / {{ event.participantsNumber }}<br>
-                                    Public: {{ event.isPublic ? 'Yes' : 'No' }} 
+                                    Participants: {{event.getReservedPlaces()}} / {{ event.participantsNumber }}<br>
+                                    Public: {{ event.isPublic ? 'Oui' : 'Non' }} 
                             </p>
-                            <a href="{{ path('event_show', {id: event.id}) }}" class="btn btn-primary">View Details</a>
+                            <a href="{{ path('event_show', {id: event.id}) }}" class="btn btn-primary">Détails</a>
                         </div>
                     </div>
             </div>

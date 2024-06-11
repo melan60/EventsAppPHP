@@ -5,8 +5,8 @@
 {% block body %}
     <h1>{{ event.title }}</h1>
     <p>{{ event.description }}</p>
-    <p><strong>Date and Time:</strong> {{ event.date|date('Y-m-d H:i') }}</p>
-    <p><strong>Max Participants:</strong> {{ event.participantsNumber }}</p>
+    <p><strong>Date et horaire:</strong> {{ event.date|date('Y-m-d H:i') }}</p>
+    <p><strong>Participants:</strong> {{event.getReservedPlaces()}} //{{ event.participantsNumber }}</p>
     <p><strong>Public:</strong> {{ event.public ? 'Yes' : 'No' }}</p>
     <a href="{{ path('event_inscription', {id: event.id}) }}" class="btn btn-primary">S'inscrire</a>
 {% endblock %}

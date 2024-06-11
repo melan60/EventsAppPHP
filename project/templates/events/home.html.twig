@@ -1,9 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Home - E-commerce Events{% endblock %}
+{% block title %}Accueil{% endblock %}
 
 {% block body %}
-    <h1 class="text-center">Upcoming Events</h1>
+    <h1 class="text-center">Événements</h1>
     <div class="row">
         {% for event in events %}
             <div class="col-md-4">
@@ -11,9 +11,9 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ event.title }}</h5>
                         <p class="card-text"><small class="text-muted">{{ event.date|date('Y-m-d H:i') }}</small></p>
-                        <p class="card-text">Participants: {{event.getRemainingPlaces()}} / {{ event.participantsNumber }}</p>
+                        <p class="card-text">Participants : {{event.getReservedPlaces}} / {{ event.participantsNumber }}</p>
                         <p class="card-text">Public: {{ event.public ? 'Yes' : 'No' }}</p>
-                        <a href="{{ path('event_show', { id: event.id }) }}" class="btn btn-primary">View Details</a>
+                        <a href="{{ path('event_show', { id: event.id }) }}" class="btn btn-primary">Détails</a>
                     </div>
                 </div>
             </div>

@@ -58,8 +58,8 @@ class Event
         return $this->participants->count() < $this->participants_number;
     }
 
-    public function getRemainingPlaces(): int {
-        return $this->participants_number - $this->participants->count();
+    public function getReservedPlaces(): int {
+        return $this->participants->count();
     }
 
     public function getId(): ?int
