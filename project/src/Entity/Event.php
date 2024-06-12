@@ -28,8 +28,14 @@ class Event
     #[ORM\Column]
     private ?int $participants_number = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $price = null;
+
     #[ORM\Column]
     private ?bool $public = null;
+
+    #[ORM\Column(options: ["default" => true])]
+    private ?bool $free = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'events')]
     private $participants;
@@ -115,6 +121,18 @@ class Event
         return $this;
     }
 
+    public function getPrice(): ?int
+    {
+        return $this->price;
+    }
+
+    public function setPrice(int $price): static
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
     public function isPublic(): ?bool
     {
         return $this->public;
@@ -123,6 +141,18 @@ class Event
     public function setPublic(bool $public): static
     {
         $this->public = $public;
+
+        return $this;
+    }
+
+    public function isFree(): ?bool
+    {
+        return $this->free;
+    }
+
+    public function setFree(bool $free): static
+    {
+        $this->free = $free;
 
         return $this;
     }

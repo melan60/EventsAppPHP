@@ -17,6 +17,8 @@ use Symfony\Component\Validator\Constraints\GreaterThan;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 
 class EventType extends AbstractType
 {
@@ -59,6 +61,20 @@ class EventType extends AbstractType
             ->add('public', CheckboxType::class, [
                 'label' => 'Public',
                 'required' => false,
+            ])
+            ->add('free', ChoiceType::class, [
+                'choices' => [
+                    'Gratuit' => '0',
+                    'Payant' => '1'
+                ],
+            ])
+            ->add('price', NumberType::class, [
+                'label' => 'Prix',
+                'scale' => 2,  // Si vous voulez des décimales
+                'attr' => [
+                    'min' => 1,
+                    'step' => 1
+                ],
             ])
             ->add('add', SubmitType::class, [
                 'label' => 'Ajouter',

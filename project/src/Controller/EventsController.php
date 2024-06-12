@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class EventsController extends AbstractController {
 
-    #[Route('/home', name: 'app_homepage')]
+    #[Route('/', name: 'app_homepage')]
     public function homepage(EventRepository $repo): Response
     {
         $user = $this->getUser(); // Obtenir l'utilisateur authentifié

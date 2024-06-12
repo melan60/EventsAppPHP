@@ -12,7 +12,7 @@
                         <h5 class="card-title">{{ event.title }}</h5>
                         <p class="card-text"><small class="text-muted">{{ event.date|date('Y-m-d H:i') }}</small></p>
                         <p class="card-text">Participants : {{event.getReservedPlaces}} / {{ event.participantsNumber }}</p>
-                        <p class="card-text">Public: {{ event.public ? 'Yes' : 'No' }}</p>
+                        <p class="card-text">Public: {{ event.public ? 'Oui' : 'Non' }}</p>
                         <a href="{{ path('event_show', { id: event.id }) }}" class="btn btn-primary">Détails</a>
                     </div>
                 </div>

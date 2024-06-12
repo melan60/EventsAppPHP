@@ -1,11 +1,11 @@
 {# templates/events/new.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Création d'un évènement{% endblock %}
+{% block title %}Création d'un événement{% endblock %}
 
 {% block body %}
     <div class="container mt-5">
-        <h1 class="text-center">Création d'un évènement</h1>
+        <h1 class="text-center">Création d'un événement</h1>
         <div class="row justify-content-center">
             <div class="col-md-6">
                 {{ form_start(form) }}
@@ -34,6 +34,15 @@
                     {{ form_widget(form.public, {'attr': {'class': 'form-control'}}) }}
                     {{ form_errors(form.public) }}
                 </div>
+                <div class="form-group mb-3">
+                    {{ form_widget(form.free, {'attr': {'class': 'form-control'}}) }}
+                    {# {{ form_errors(form.cout) }} #}
+                </div>
+                <div class="form-group mb-3 id="container">
+                {{ form_label(form.price) }}
+                    {{ form_widget(form.price, {'attr': {'class': 'form-control'}}) }}
+                    {# {{ form_errors(form.cout) }} #}
+                </div>
                 <div class="form-group text-center">
                     {{ form_widget(form.add, {'attr': {'class': 'btn btn-primary'}}) }}
                 </div>
@@ -41,5 +50,21 @@
             </div>
         </div>
     </div>
+     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const freeSelect = document.getElementById('event_free');
+            const priceContainer = document.getElementById('event_price').parentElement;
+            const togglePriceField = () => {
+                if (freeSelect.value === '1') {
+                    priceContainer.style.display = 'block';
+                } else {
+                    priceContainer.style.display = 'none';
+                }
+            };
+
+            freeSelect.addEventListener('change', togglePriceField);
+            togglePriceField();
+        });
+    </script>
 {% endblock %}
 
