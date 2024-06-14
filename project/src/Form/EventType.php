@@ -67,6 +67,8 @@ class EventType extends AbstractType
                     'Gratuit' => '0',
                     'Payant' => '1'
                 ],
+                'mapped' => false,
+                'data' => '0',  // Valeur par défaut
             ])
             ->add('price', NumberType::class, [
                 'label' => 'Prix',

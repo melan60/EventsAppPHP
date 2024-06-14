@@ -56,9 +56,11 @@
             const priceContainer = document.getElementById('event_price').parentElement;
             const togglePriceField = () => {
                 if (freeSelect.value === '1') {
+                    document.getElementById('event_price').value ="";
                     priceContainer.style.display = 'block';
                 } else {
                     priceContainer.style.display = 'none';
+                    document.getElementById('event_price').value = 0;
                 }
             };
 
