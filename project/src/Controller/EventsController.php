@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use Psr\Log\LoggerInterface;
 use App\Form\EventType;
 use App\Repository\EventRepository;
 use App\Repository\UserRepository;
@@ -14,6 +15,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 
 class EventsController extends AbstractController {
+    public function __construct(private LoggerInterface $logger) {
+    }
 
     #[Route('/', name: 'app_homepage')]
     public function homepage(EventRepository $repo): Response
@@ -55,7 +58,14 @@ class EventsController extends AbstractController {
             $entityManager->persist($event);
             $entityManager->flush();
 
-            return $this->redirectToRoute('user_events');
+            dd("dans le if");
+            if($event->getPrice()<=0){
+                $this->logger->info('dans le if');
+                return $this->redirectToRoute('user_events');
+            }else{
+                $this->logger->info('dans le else');
+                return $this->redirectToRoute('payment');
+            }
         }
 
         return $this->render('events/show.html.twig', [

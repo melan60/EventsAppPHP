@@ -6,7 +6,9 @@
     <h1>{{ event.title }}</h1>
     <p>{{ event.description }}</p>
     <p><strong>Date et horaire:</strong> {{ event.date|date('Y-m-d H:i') }}</p>
-    <p><strong>Participants:</strong> {{event.getReservedPlaces()}} //{{ event.participantsNumber }}</p>
+    <p><strong>Participants:</strong> {{event.getReservedPlaces()}} / {{ event.participantsNumber }}</p>
     <p><strong>Public:</strong> {{ event.public ? 'Yes' : 'No' }}</p>
-    <a href="{{ path('event_inscription', {id: event.id}) }}" class="btn btn-primary">S'inscrire</a>
+    <p>{{event.hasRemainingPlaces()}}</p>
+   <button class="btn btn-primary" {{event.hasRemainingPlaces() ? "" : "disabled" }} onclick="window.location.href='{{ path('event_inscription', {id: event.id}) }}'">S'inscrire</button>
+    
 {% endblock %}
