@@ -8,9 +8,11 @@ use App\Form\EventType;
 use App\Repository\EventRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Mime\NotificationEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -47,7 +49,7 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/events/inscription/{id}', name: 'event_inscription')]
-    public function inscription(Event $event, UserRepository $repo, EntityManagerInterface $entityManager): Response {
+    public function inscription(Event $event, UserRepository $repo, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
         $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
         $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
 
@@ -58,19 +60,54 @@ class EventsController extends AbstractController {
             $entityManager->persist($event);
             $entityManager->flush();
 
-            dd("dans le if");
+            $email = (new NotificationEmail())
+                ->from('melanbenoit60@gmail.com')
+                ->to($user->getEmail())
+                ->subject('Inscription à l\'événement')
+                ->text('Vous vous êtes inscrit à l\'événement ' .$event->getTitle())
+                ->html('Vous vous êtes inscrit à l\'événement ' .$event->getTitle());
+
+            $mailer->send($email);
+
             if($event->getPrice()<=0){
                 $this->logger->info('dans le if');
                 return $this->redirectToRoute('user_events');
             }else{
                 $this->logger->info('dans le else');
-                return $this->redirectToRoute('payment');
+                return $this->redirectToRoute('payment', [
+                    'id' => $event->getId(),
+                ]);
             }
         }
 
         return $this->render('events/show.html.twig', [
             'event' => $event,
         ]);
+    }
+
+    #[Route('/events/desinscription/{id}', name: 'event_desinscription')]
+    public function desinscription(Event $event, UserRepository $repo, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
+        $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
+        $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
+
+        $event->removeParticipant($user);
+        $user->removeEvent($event);
+        $entityManager->persist($user);
+        $entityManager->persist($event);
+        $entityManager->flush();
+
+
+        $email = (new Email())
+            ->from('melanbenoit60@gmail.com')
+            ->to($user->getEmail())
+            ->subject('Desinscription à l\'événement')
+            ->text('Vous vous êtes desinscrit à l\'événement ' .$event->getTitle())
+            ->html('Vous vous êtes désinscrit de l\'événement ' .$event->getTitle());
+
+        $mailer->send($email);
+
+
+        return $this->redirectToRoute('user_events');
     }
 
     #[Route('/events/{id}', name: 'event_show')]

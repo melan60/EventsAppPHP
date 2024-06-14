@@ -9,6 +9,8 @@
     <p><strong>Participants:</strong> {{event.getReservedPlaces()}} / {{ event.participantsNumber }}</p>
     <p><strong>Public:</strong> {{ event.public ? 'Yes' : 'No' }}</p>
     <p>{{event.hasRemainingPlaces()}}</p>
-   <button class="btn btn-primary" {{event.hasRemainingPlaces() ? "" : "disabled" }} onclick="window.location.href='{{ path('event_inscription', {id: event.id}) }}'">S'inscrire</button>
-    
+
+    {% if not event.hasParticipant(app.user) %}
+        <button class="btn btn-primary" {{event.hasRemainingPlaces() ? "" : "disabled" }} onclick="window.location.href='{{ path('event_inscription', {id: event.id}) }}'">S'inscrire</button>
+    {% endif %}
 {% endblock %}

@@ -57,6 +57,10 @@ class Event
         return $this;
     }
 
+    public function hasParticipant(User $participant): bool {
+        return $this->participants->contains($participant);
+    }
+
     public function hasRemainingPlaces(): bool {
         return $this->participants->count() < $this->participants_number;
     }

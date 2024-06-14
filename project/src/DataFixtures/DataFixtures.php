@@ -36,6 +36,7 @@ class DataFixtures extends Fixture
             $event->setDate(new \DateTime('2024-06-0' . $j . ' 10:00:00'));
             $event->setParticipantsNumber(50);
             $event->setPublic(true);
+            $event->setPrice(0);
 
             $manager->persist($event);
         }

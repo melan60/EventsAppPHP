@@ -3,10 +3,12 @@ FROM php:8.2-fpm
 RUN apt-get update && apt-get install -y \
        libzip-dev \
        libsqlite3-dev \
+       libxslt-dev \
        zip \
-      wget \
-     && docker-php-ext-install \
-       pdo pdo_sqlite zip
+       wget \
+    && docker-php-ext-install \
+       pdo pdo_sqlite zip xsl \
+    && apt-get clean
 
 # Installer Composer
 ADD ./docker/install-composer.sh /install-composer.sh
