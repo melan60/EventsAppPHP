@@ -3,15 +3,36 @@
 {% block title %}{{ event.title }} - Event Details{% endblock %}
 
 {% block body %}
-    <h1>{{ event.title }}</h1>
+   
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" id="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+     <h1>Détail de l'événement : {{ event.title }}</h1>
     <p>{{ event.description }}</p>
     <p><strong>Date et horaire:</strong> {{ event.date|date('Y-m-d H:i') }}</p>
     <p><strong>Participants:</strong> {{event.getReservedPlaces()}} / {{ event.participantsNumber }}</p>
     <p><strong>Prix : </strong>{{ event.price }}€</p>
-    <p><strong>Public : </strong>{{event.getReservedPlaces()}} </p>
-    <p>{{event.hasRemainingPlaces()}}</p>
-
+    <p><strong>Public : </strong> {{ event.public ? 'Oui' : 'Non' }} </p>
     {% if not event.hasParticipant(app.user) %}
-        <button class="btn btn-primary" {{event.hasRemainingPlaces() ? "" : "disabled" }} onclick="window.location.href='{{ path('event_inscription', {id: event.id}) }}'">S'inscrire</button>
+        <button 
+            class="btn btn-primary" 
+                {{event.hasRemainingPlaces() ? "" : "disabled data-trigger='hover' data-placement='right' title='Plus de places disponibles' data-content='Il n\'y a plus de places disponibles pour cet événement.'" }} 
+            onclick="window.location.href='{{ path('event_inscription', {id: event.id}) }}'">
+            S'inscrire
+        </button>
     {% endif %}
+
+    <script>
+        setTimeout(function() {
+            var alertMessage = document.getElementById('alert');
+            alertMessage.style.display = 'none';
+        }, 5000);
+
 {% endblock %}

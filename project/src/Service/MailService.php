@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Symfony\Bridge\Twig\Mime\NotificationEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
@@ -16,7 +17,7 @@ class MailService {
     }
 
     public function sendEmail(string $email, string $subject, string $message) {
-        $email = (new Email())
+        $email = (new NotificationEmail())
             ->from($this->fromEmail)
             ->to($email)
             ->subject($subject)

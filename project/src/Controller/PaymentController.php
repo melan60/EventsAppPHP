@@ -32,7 +32,7 @@ class PaymentController extends AbstractController {
     public function stripe($id, UserRepository $repo):RedirectResponse{
         $event = $this->entityManager->getRepository(Event::class)->find($id);
         if(!$event){
-            return $this->redirectToRoute('');
+            return $this->redirectToRoute(''); //TODO
         }
 
         Stripe::setApiKey('sk_test_51PRW8HAXcJK6KQYTkLgg7ryENv8Pm2gN2UdsEjqKZNavv0pe8jf9mHpPWohglEM1Znuflriuhi5XsFsQwaNtjriu00zlLwwIxt');
@@ -53,7 +53,6 @@ class PaymentController extends AbstractController {
                 'quantity' => 1,
         ];
 
-
         // Création de session checkout --> contrôle les informations que le client peut consulter sur la page de paiment
         $checkout_session = Session::create([
             'customer_email' => $user->getEmail(),
@@ -69,24 +68,6 @@ class PaymentController extends AbstractController {
         ]);
 
         return new RedirectResponse($checkout_session->url);
-
-
-        // A rajouter si le paiement est un succès
-        // $event->addParticipant($user);
-        // $user->addEvent($event);
-        // $entityManager->persist($user);
-        // $entityManager->persist($event);
-        // $entityManager->flush();
-
-        // $email = (new NotificationEmail())
-        //     ->from('melanbenoit60@gmail.com')
-        //     ->to($user->getEmail())
-        //     ->subject('Inscription à l\'événement')
-        //     ->text('Vous vous êtes inscrit à l\'événement ' .$event->getTitle())
-        //     ->html('Vous vous êtes inscrit à l\'événement ' .$event->getTitle());
-
-        // $mailer->send($email);
-
     }
 
     #[Route('event/stripe/success/{id}', name: 'payment_success')]
@@ -105,16 +86,19 @@ class PaymentController extends AbstractController {
             ->from('melanbenoit60@gmail.com')
             ->to($user->getEmail())
             ->subject('Inscription à l\'événement')
-            ->text('Vous vous êtes inscrit à l\'événement ' .$event->getTitle())
-            ->html('Vous vous êtes inscrit à l\'événement ' .$event->getTitle());
+            ->text('Vous vous êtes inscrit à l\'événement ' .$event->getTitle().'le paiement a été validé avec succès')
+            ->html('Vous vous êtes inscrit à l\'événement ' .$event->getTitle().'le paiement a été validé avec succès');
 
         $mailer->send($email);
+        $this->addFlash('success', 'Le paiement a été validé avec succès et vous êtes inscrit à l\'événement.'.$event->getTitle());
         return $this->redirectToRoute('user_events');
     }
 
     #[Route('event/stripe/echec/{id}', name: 'payment_echec')]
     public function stripeEchec($id):RedirectResponse{
-        //evenement detail
-        return $this->render('payment/success.html.twig');
+        $this->addFlash('danger', 'Le paiement a échoué veuillez cliquer sur s\'inscrire pour réessayer');
+        return $this->redirectToRoute('event_show', [
+            'id' => $id,
+        ]);
     }
 }

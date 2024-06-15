@@ -4,6 +4,17 @@
 {% block title %}My Events{% endblock %}
 
 {% block body %}
+    
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" id="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endfor %}
     <h1 class="text-center">Mes Événements</h1>
     <div class="row">
         {% for event in events %}
@@ -22,4 +33,10 @@
             </div>
         {% endfor %}
     </div>
+    <script>
+        setTimeout(function() {
+            var alertMessage = document.getElementById('alert');
+            alertMessage.style.display = 'none';
+        }, 5000);
+    </script>
 {% endblock %}
