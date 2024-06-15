@@ -46,6 +46,7 @@
                             </p>
                             <p class="card-text">
                                     Participants: {{event.getReservedPlaces()}} / {{ event.participantsNumber }}<br>
+                                    Prix : {{ event.price }} €<br>
                                     Public: {{ event.isPublic ? 'Oui' : 'Non' }} 
                             </p>
                             <a href="{{ path('event_show', {id: event.id}) }}" class="btn btn-primary">Détails</a>
