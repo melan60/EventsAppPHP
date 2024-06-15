@@ -4,21 +4,26 @@ namespace App\Controller;
 
 use Doctrine\ORM\EntityManager;
 use App\Entity\Event;
+use App\Service\CartService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Stripe\Stripe;
+use Stripe\Product;
+use Stripe\Price;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Stripe\Checkout\Session;
 use App\Repository\UserRepository;
-
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class PaymentController extends AbstractController {
 
     private EntityManager $entityManager;
-    public function __construct(EntityManagerInterface $entityManager,private LoggerInterface $logger) {
-        $this->entityManager = $entityManager;  
+    private UrlGeneratorInterface $generator;
+    public function __construct(EntityManagerInterface $entityManager,private LoggerInterface $logger, UrlGeneratorInterface $generator) {
+        $this->entityManager = $entityManager;
+        $this->generator = $generator;
     }
 
     #[Route('event/stripe/{id}', name: 'payment')]
@@ -34,18 +39,34 @@ class PaymentController extends AbstractController {
         $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
         $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
 
+        //Créer un produit stripe
+        $product = [
+            'price_data' => [
+                'currency'=> 'eur',
+                'unit_amount' => ($event->getPrice())* 100, //prix en centimes
+                'product_data'=> [
+                   'name'=> $event->getTitle(),
+                ]
+            ],
+                'quantity' => 1,
+        ];
+
+
         // Création de session checkout --> contrôle les informations que le client peut consulter sur la page de paiment
         $checkout_session = Session::create([
             'customer_email' => $user->getEmail(),
-            'line_items' => [[
-              # Provide the exact Price ID (e.g. pr_1234) of the product you want to sell
-              'price' => $event->getPrice(),
-              'quantity' => 1,
-            ]],
+            'payment_method_types' => ['card'],
+            'line_items'=>[$product],
             'mode' => 'payment',
-            'success_url' => $YOUR_DOMAIN . '/success.html',
-            'cancel_url' => $YOUR_DOMAIN . '/cancel.html',
+            'success_url' => $this->generator->generate('payment_success',[
+                'id'=> $event->getId(),
+            ], UrlGeneratorInterface::ABSOLUTE_URL),
+            'cancel_url' => $this->generator->generate('payment_echec',[
+                'id'=> $event->getId(),
+            ], UrlGeneratorInterface::ABSOLUTE_URL),
         ]);
+
+        return new RedirectResponse($checkout_session->url);
 
 
         // A rajouter si le paiement est un succès
@@ -64,5 +85,15 @@ class PaymentController extends AbstractController {
 
         // $mailer->send($email);
 
+    }
+
+    #[Route('event/stripe/success/{id}', name: 'payment_success')]
+    public function stripeSuccess($id, CartService $service):RedirectResponse{
+        return $this->render('payment/success.html.twig');
+    }
+
+    #[Route('event/stripe/echec/{id}', name: 'payment_echec')]
+    public function stripeEchec($id, CartService $service):RedirectResponse{
+        return $this->render('payment/success.html.twig');
     }
 }
