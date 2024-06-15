@@ -34,6 +34,19 @@ class Event
     #[ORM\Column]
     private ?bool $public = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'createdEvents')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private $creator;
+
+    public function getCreator(): ?User {
+        return $this->creator;
+    }
+
+    public function setCreator(?User $creator): self {
+        $this->creator = $creator;
+        return $this;
+    }
+
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'events')]
     private $participants;
 
@@ -53,7 +66,9 @@ class Event
     }
 
     public function removeParticipant(User $participant): self {
-        $this->participants->removeElement($participant);
+        if($this->participants->removeElement($participant)) {
+            $participant->removeEvent($this);
+        }
         return $this;
     }
 

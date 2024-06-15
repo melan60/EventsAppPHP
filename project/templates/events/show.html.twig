@@ -3,7 +3,7 @@
 {% block title %}{{ event.title }} - Event Details{% endblock %}
 
 {% block body %}
-   
+
     {% for label, messages in app.flashes %}
         {% for message in messages %}
             <div class="alert alert-{{ label }}" id="alert">
@@ -21,12 +21,45 @@
     <p><strong>Prix : </strong>{{ event.price }}€</p>
     <p><strong>Public : </strong> {{ event.public ? 'Oui' : 'Non' }} </p>
     {% if not event.hasParticipant(app.user) %}
-        <button 
-            class="btn btn-primary" 
-                {{event.hasRemainingPlaces() ? "" : "disabled data-trigger='hover' data-placement='right' title='Plus de places disponibles' data-content='Il n\'y a plus de places disponibles pour cet événement.'" }} 
+        <button
+            class="btn btn-primary"
+                {{event.hasRemainingPlaces() ? "" : "disabled data-trigger='hover' data-placement='right' title='Plus de places disponibles' data-content='Il n\'y a plus de places disponibles pour cet événement.'" }}
             onclick="window.location.href='{{ path('event_inscription', {id: event.id}) }}'">
             S'inscrire
         </button>
+    {% endif %}
+
+    {% if event.creator == app.user %}
+        <a href="{{ path('event_edit', { id: event.id }) }}" class="btn btn-warning">
+            Modifier
+            <i class="bi bi-pencil-square"></i>
+        </a>
+
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modalDelete">
+            Supprimer
+            <i class="bi bi-trash"></i>
+        </button>
+
+        <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="modalDeleteLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalDeleteLabel">Confirmer la suppression</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Êtes-vous sûr de vouloir supprimer cet événement ?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <a href="{{ path('event_delete', { id: event.id }) }}" class="btn btn-danger"> Supprimer </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     {% endif %}
 
     <script>
@@ -34,5 +67,6 @@
             var alertMessage = document.getElementById('alert');
             alertMessage.style.display = 'none';
         }, 5000);
+    </script>
 
 {% endblock %}

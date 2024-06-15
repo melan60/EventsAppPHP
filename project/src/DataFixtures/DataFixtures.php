@@ -8,36 +8,47 @@ use App\Entity\User;
 use App\Entity\Event;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class DataFixtures extends Fixture
-{
+class DataFixtures extends Fixture {
     private $passwordHasher;
 
-    public function __construct(UserPasswordHasherInterface $passwordHasher)
-    {
+    public function __construct(UserPasswordHasherInterface $passwordHasher) {
         $this->passwordHasher = $passwordHasher;
     }
 
     public function load(ObjectManager $manager) {
+        $userNoms = ["test", "az", "Yo", "admin", "user1"];
+        $userPrenoms = ["test", "er", "Yo", "admin", "user1"];
+        $userMails = ["test@test.com", "az@er.com", "yo@yo.com", "admin@admin.com", "user1@example.com"];
+        $userPasswords = ["test1234", "azerty123", "yoyo1234", 'admin987', 'password1'];
 
-        // Create some users
-        for ($i = 1; $i <= 5; $i++) {
+        $users = [];
+        for ($i = 0; $i < count($userNoms); $i++) {
             $user = new User();
-            $user->setNom('Nom' . $i);
-            $user->setPrenom('Prenom' . $i);
-            $user->setEmail('user' . $i . '@example.com');
-            $user->setPassword($this->passwordHasher->hashPassword($user, 'password' . $i));
+            $user->setNom($userNoms[$i]);
+            $user->setPrenom($userPrenoms[$i]);
+            $user->setEmail($userMails[$i]);
+            $user->setPassword($this->passwordHasher->hashPassword($user, $userPasswords[$i]));
             $manager->persist($user);
+            $users[] = $user;
         }
 
-        // Create some events
-        for ($j = 1; $j <= 5; $j++) {
+        $eventsTitle = ["Initiation boxe", "Initiation volley", "Initiation self-defense", "Initiation rugby", "Initiation aviron"];
+        $eventsDescription = ["Boxe", "Volley", "Self-defense", "Rugby", "Aviron"];
+        $eventsNbParticipants = [5, 12, 2, 22, 10];
+        $eventsPublic = [false, true, true, false, true];
+        $eventsPrice = [0, 0, 0, 10, 20];
+
+        $userAdmin = $users[3];
+
+        for ($i = 0; $i < count($eventsTitle); $i++) {
             $event = new Event();
-            $event->setTitle('Event ' . $j);
-            $event->setDescription('Description of event ' . $j);
-            $event->setDate(new \DateTime('2024-06-0' . $j . ' 10:00:00'));
-            $event->setParticipantsNumber(50);
-            $event->setPublic(true);
-            $event->setPrice(0);
+            $event->setTitle($eventsTitle[$i]);
+            $event->setDescription($eventsDescription[$i]);
+            $event->setDate(new \DateTime('2024-06-30 10:00:00'));
+            $event->setCreator($userAdmin);
+            $event->setPrice($eventsPrice[$i]);
+            $event->setPublic($eventsPublic[$i]);
+            $event->setParticipantsNumber($eventsNbParticipants[$i]);
 
             $manager->persist($event);
         }

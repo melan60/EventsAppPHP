@@ -62,14 +62,6 @@ class EventType extends AbstractType
                 'label' => 'Public',
                 'required' => false,
             ])
-            ->add('free', ChoiceType::class, [
-                'choices' => [
-                    'Gratuit' => '0',
-                    'Payant' => '1'
-                ],
-                'mapped' => false,
-                'data' => '0',  // Valeur par défaut
-            ])
             ->add('price', NumberType::class, [
                 'label' => 'Prix',
                 'scale' => 2,  // Si vous voulez des décimales
@@ -79,7 +71,7 @@ class EventType extends AbstractType
                 ],
             ])
             ->add('add', SubmitType::class, [
-                'label' => 'Ajouter',
+                'label' => 'Valider',
                 'attr' => ['class' => 'btn btn-primary btn-block']
             ]);
         ;

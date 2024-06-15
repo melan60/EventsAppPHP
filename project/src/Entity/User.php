@@ -42,11 +42,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
 //    )]
     private ?string $email = null;
 
+    #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'creator', cascade: ['remove'])]
+    private $createdEvents;
+
+    public function getCreatedEvents(): Collection {
+        return $this->createdEvents;
+    }
+
+    public function addCreatedEvent(Event $event): self {
+        $this->createdEvents->add($event);
+        return $this;
+    }
+
+    public function removeCreatedEvent(Event $event): self {
+        $this->createdEvents->removeElement($event);
+        return $this;
+    }
+
     #[ORM\ManyToMany(targetEntity: Event::class, mappedBy: 'participants')]
     private $events;
 
     public function __construct() {
         $this->events = new ArrayCollection();
+        $this->createdEvents = new ArrayCollection();
     }
 
     public function getEvents(): Collection {
@@ -62,9 +80,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     }
 
     public function removeEvent(Event $event): self {
-        if ($this->events->removeElement($event)) {
-            $event->removeParticipant($this);
-        }
+        $this->events->removeElement($event);
         return $this;
     }
 

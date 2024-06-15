@@ -12,37 +12,42 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\NotificationEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
+use Symfony\Component\HttpKernel\Log\Logger;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 
 class EventsController extends AbstractController {
     private MailService $mailService;
-    public function __construct(private LoggerInterface $logger, MailService $mailService) {
+    private EntityManagerInterface $entityManager;
+    private EventRepository $repo;
+    public function __construct(private LoggerInterface $logger, MailService $mailService, EntityManagerInterface $entityManager, EventRepository $eventRepository) {
         $this->mailService = $mailService;
+        $this->entityManager = $entityManager;
+        $this->repo = $eventRepository;
     }
 
     #[Route('/', name: 'app_homepage')]
-    public function homepage(EventRepository $repo): Response
+    public function homepage(): Response
     {
         $user = $this->getUser(); // Obtenir l'utilisateur authentifié
 
         return $this->render('events/home.html.twig', [
             'user' => $user,
-            'events' => $repo->findAll()
+            'events' => $this->repo->findAll()
         ]);
     }
 
     #[Route('/events/new', name: 'event_new')]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response {
+    public function new(Request $request): Response {
         $event = new Event();
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($event);
-            $entityManager->flush();
+            $event->setCreator($this->getUser());
+//            $user =
+            $this->entityManager->persist($event);
+            $this->entityManager->flush();
 
             return $this->redirectToRoute('event_show', ['id' => $event->getId()]);
         }
@@ -51,8 +56,34 @@ class EventsController extends AbstractController {
         ]);
     }
 
+    #[Route('/events/{id}/edit', name: "event_edit")]
+    public function edit(Request $request, Event $event): Response {
+        $form = $this->createForm(EventType::class, $event);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->flush();
+            return $this->redirectToRoute('event_show', ['id' => $event->getId()]);
+        }
+
+        return $this->render('events/edit.html.twig', [
+            'event' => $event,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/events/{id}/delete', name: 'event_delete')]
+    public function delete(Event $event): Response {
+        foreach ($event->getParticipants() as $participant) {
+            $event->removeParticipant($participant);
+        }
+        $this->entityManager->remove($event);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('list_events');
+    }
+
     #[Route('/events/inscription/{id}', name: 'event_inscription')]
-    public function inscription(Event $event, UserRepository $repo, EntityManagerInterface $entityManager): Response {
+    public function inscription(Event $event, UserRepository $repo): Response {
         $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
         $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
 
@@ -60,9 +91,9 @@ class EventsController extends AbstractController {
             if($event->getPrice()<=0){
                 $event->addParticipant($user);
                 $user->addEvent($event);
-                $entityManager->persist($user);
-                $entityManager->persist($event);
-                $entityManager->flush();
+                $this->entityManager->persist($user);
+                $this->entityManager->persist($event);
+                $this->entityManager->flush();
 
                 $this->mailService->sendEmail($user->getEmail(), 'Inscription à l\'événement', 'Vous vous êtes inscrit à l\'événement ' .$event->getTitle());
 
@@ -80,15 +111,15 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/events/desinscription/{id}', name: 'event_desinscription')]
-    public function desinscription(Event $event, UserRepository $repo, EntityManagerInterface $entityManager): Response {
+    public function desinscription(Event $event, UserRepository $repo): Response {
         $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
         $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
 
         $event->removeParticipant($user);
         $user->removeEvent($event);
-        $entityManager->persist($user);
-        $entityManager->persist($event);
-        $entityManager->flush();
+        $this->entityManager->persist($user);
+        $this->entityManager->persist($event);
+        $this->entityManager->flush();
 
         $this->mailService->sendEmail($user->getEmail(), 'Désinscription à l\'événement', 'Vous vous êtes désinscrit de l\'événement ' .$event->getTitle());
 
@@ -106,7 +137,7 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/events', name: 'list_events')]
-    public function listEvents(EventRepository $repo, Request $request): Response
+    public function listEvents(Request $request): Response
     {
         $title = $request->query->get('title');
         $date = $request->query->get('date');
@@ -117,7 +148,7 @@ class EventsController extends AbstractController {
         $limit = 5;
 
         // ?pb va retourner un event qui correspond au critères exact pb pour date 
-        $events_pagination = $repo->findByFilters($title, $date, $placesRemaining, $isPublic, $page, $limit);
+        $events_pagination = $this->repo->findByFilters($title, $date, $placesRemaining, $isPublic, $page, $limit);
         $totalItems = count($events_pagination);
         $pagesCount = ceil($totalItems / $limit);
         // 'events' => $repo->findAllPagination(1, 3)

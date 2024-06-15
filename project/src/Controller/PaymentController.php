@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\MailService;
 use Doctrine\ORM\EntityManager;
 use App\Entity\Event;
 use App\Service\CartService;
@@ -21,11 +22,13 @@ use Symfony\Bridge\Twig\Mime\NotificationEmail;
 
 class PaymentController extends AbstractController {
 
-    private EntityManager $entityManager;
+    private EntityManagerInterface $entityManager;
     private UrlGeneratorInterface $generator;
-    public function __construct(EntityManagerInterface $entityManager,private LoggerInterface $logger, UrlGeneratorInterface $generator) {
+    private MailService $mailService;
+    public function __construct(EntityManagerInterface $entityManager,private LoggerInterface $logger, UrlGeneratorInterface $generator, MailService $mailService) {
         $this->entityManager = $entityManager;
         $this->generator = $generator;
+        $this->mailService = $mailService;
     }
 
     #[Route('event/stripe/{id}', name: 'payment')]
@@ -71,7 +74,7 @@ class PaymentController extends AbstractController {
     }
 
     #[Route('event/stripe/success/{id}', name: 'payment_success')]
-    public function stripeSuccess($id, EntityManagerInterface $entityManager, UserRepository $repo, MailerInterface $mailer, Event $event):RedirectResponse{
+    public function stripeSuccess($id, EntityManagerInterface $entityManager, UserRepository $repo, Event $event):RedirectResponse{
         //recup user
         $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
         $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
@@ -82,21 +85,15 @@ class PaymentController extends AbstractController {
         $entityManager->persist($event);
         $entityManager->flush();
 
-        $email = (new NotificationEmail())
-            ->from('melanbenoit60@gmail.com')
-            ->to($user->getEmail())
-            ->subject('Inscription à l\'événement')
-            ->text('Vous vous êtes inscrit à l\'événement ' .$event->getTitle().'le paiement a été validé avec succès')
-            ->html('Vous vous êtes inscrit à l\'événement ' .$event->getTitle().'le paiement a été validé avec succès');
+        $this->mailService->sendEmail($user->getEmail(), 'Inscription à l\'événement', 'Vous vous êtes inscrit à l\'événement ' .$event->getTitle().'le paiement a été validé avec succès');
 
-        $mailer->send($email);
-        $this->addFlash('success', 'Le paiement a été validé avec succès et vous êtes inscrit à l\'événement.'.$event->getTitle());
+        $this->addFlash('success', 'Le paiement a été validé avec succès et vous êtes inscrit à l\'événement '.$event->getTitle());
         return $this->redirectToRoute('user_events');
     }
 
     #[Route('event/stripe/echec/{id}', name: 'payment_echec')]
     public function stripeEchec($id):RedirectResponse{
-        $this->addFlash('danger', 'Le paiement a échoué veuillez cliquer sur s\'inscrire pour réessayer');
+        $this->addFlash('danger', 'Le paiement a échoué veuillez cliquer sur S\'inscrire pour réessayer');
         return $this->redirectToRoute('event_show', [
             'id' => $id,
         ]);
