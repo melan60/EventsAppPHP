@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Service\MailService;
 use Psr\Log\LoggerInterface;
 use App\Form\EventType;
 use App\Repository\EventRepository;
@@ -17,7 +18,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 
 class EventsController extends AbstractController {
-    public function __construct(private LoggerInterface $logger) {
+    private MailService $mailService;
+    public function __construct(private LoggerInterface $logger, MailService $mailService) {
+        $this->mailService = $mailService;
     }
 
     #[Route('/', name: 'app_homepage')]
@@ -49,7 +52,7 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/events/inscription/{id}', name: 'event_inscription')]
-    public function inscription(Event $event, UserRepository $repo, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
+    public function inscription(Event $event, UserRepository $repo, EntityManagerInterface $entityManager): Response {
         $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
         $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
 
@@ -61,14 +64,8 @@ class EventsController extends AbstractController {
                 $entityManager->persist($event);
                 $entityManager->flush();
 
-                $email = (new NotificationEmail())
-                    ->from('melanbenoit60@gmail.com')
-                    ->to($user->getEmail())
-                    ->subject('Inscription à l\'événement')
-                    ->text('Vous vous êtes inscrit à l\'événement ' .$event->getTitle())
-                    ->html('Vous vous êtes inscrit à l\'événement ' .$event->getTitle());
+                $this->mailService->sendEmail($user->getEmail(), 'Inscription à l\'événement', 'Vous vous êtes inscrit à l\'événement ' .$event->getTitle());
 
-                $mailer->send($email);
                 return $this->redirectToRoute('user_events');
             }else{
                 return $this->redirectToRoute('payment', [
@@ -83,7 +80,7 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/events/desinscription/{id}', name: 'event_desinscription')]
-    public function desinscription(Event $event, UserRepository $repo, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
+    public function desinscription(Event $event, UserRepository $repo, EntityManagerInterface $entityManager): Response {
         $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
         $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
 
@@ -93,16 +90,7 @@ class EventsController extends AbstractController {
         $entityManager->persist($event);
         $entityManager->flush();
 
-
-        $email = (new Email())
-            ->from('melanbenoit60@gmail.com')
-            ->to($user->getEmail())
-            ->subject('Desinscription à l\'événement')
-            ->text('Vous vous êtes desinscrit à l\'événement ' .$event->getTitle())
-            ->html('Vous vous êtes désinscrit de l\'événement ' .$event->getTitle());
-
-        $mailer->send($email);
-
+        $this->mailService->sendEmail($user->getEmail(), 'Désinscription à l\'événement', 'Vous vous êtes désinscrit de l\'événement ' .$event->getTitle());
 
         return $this->redirectToRoute('user_events');
     }

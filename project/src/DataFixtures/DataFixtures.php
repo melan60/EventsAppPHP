@@ -18,6 +18,7 @@ class DataFixtures extends Fixture
     }
 
     public function load(ObjectManager $manager) {
+
         // Create some users
         for ($i = 1; $i <= 5; $i++) {
             $user = new User();
