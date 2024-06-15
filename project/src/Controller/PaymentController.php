@@ -16,6 +16,8 @@ use Psr\Log\LoggerInterface;
 use Stripe\Checkout\Session;
 use App\Repository\UserRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Bridge\Twig\Mime\NotificationEmail;
 
 class PaymentController extends AbstractController {
 
@@ -88,12 +90,31 @@ class PaymentController extends AbstractController {
     }
 
     #[Route('event/stripe/success/{id}', name: 'payment_success')]
-    public function stripeSuccess($id, CartService $service):RedirectResponse{
-        return $this->render('payment/success.html.twig');
+    public function stripeSuccess($id, EntityManagerInterface $entityManager, UserRepository $repo, MailerInterface $mailer, Event $event):RedirectResponse{
+        //recup user
+        $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
+        $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
+
+        $event->addParticipant($user);
+        $user->addEvent($event);
+        $entityManager->persist($user);
+        $entityManager->persist($event);
+        $entityManager->flush();
+
+        $email = (new NotificationEmail())
+            ->from('melanbenoit60@gmail.com')
+            ->to($user->getEmail())
+            ->subject('Inscription à l\'événement')
+            ->text('Vous vous êtes inscrit à l\'événement ' .$event->getTitle())
+            ->html('Vous vous êtes inscrit à l\'événement ' .$event->getTitle());
+
+        $mailer->send($email);
+        return $this->redirectToRoute('user_events');
     }
 
     #[Route('event/stripe/echec/{id}', name: 'payment_echec')]
-    public function stripeEchec($id, CartService $service):RedirectResponse{
+    public function stripeEchec($id):RedirectResponse{
+        //evenement detail
         return $this->render('payment/success.html.twig');
     }
 }
