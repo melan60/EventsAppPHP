@@ -54,26 +54,23 @@ class EventsController extends AbstractController {
         $user = $repo->findByIdentifier($userInterface->getUserIdentifier());
 
         if($event->hasRemainingPlaces() and $user) {
-            $event->addParticipant($user);
-            $user->addEvent($event);
-            $entityManager->persist($user);
-            $entityManager->persist($event);
-            $entityManager->flush();
-
-            $email = (new NotificationEmail())
-                ->from('melanbenoit60@gmail.com')
-                ->to($user->getEmail())
-                ->subject('Inscription à l\'événement')
-                ->text('Vous vous êtes inscrit à l\'événement ' .$event->getTitle())
-                ->html('Vous vous êtes inscrit à l\'événement ' .$event->getTitle());
-
-            $mailer->send($email);
-
             if($event->getPrice()<=0){
-                $this->logger->info('dans le if');
+                $event->addParticipant($user);
+                $user->addEvent($event);
+                $entityManager->persist($user);
+                $entityManager->persist($event);
+                $entityManager->flush();
+
+                $email = (new NotificationEmail())
+                    ->from('melanbenoit60@gmail.com')
+                    ->to($user->getEmail())
+                    ->subject('Inscription à l\'événement')
+                    ->text('Vous vous êtes inscrit à l\'événement ' .$event->getTitle())
+                    ->html('Vous vous êtes inscrit à l\'événement ' .$event->getTitle());
+
+                $mailer->send($email);
                 return $this->redirectToRoute('user_events');
             }else{
-                $this->logger->info('dans le else');
                 return $this->redirectToRoute('payment', [
                     'id' => $event->getId(),
                 ]);
