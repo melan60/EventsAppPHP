@@ -20,14 +20,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
-                            Événements
-                        </a>
-                        <div class="dropdown-menu" style="left: auto">
-                            <a class="dropdown-item" href="/events">Liste des événements</a>
-                            <a class="dropdown-item" href="/events/new">Créer un événement</a>
-                        </div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('list_events') }}">Liste des événements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('event_new') }}">Créer un événement</a>
                     </li>
                 </ul>
 
