@@ -23,7 +23,7 @@
     {% if not event.hasParticipant(app.user) %}
         <button
             class="btn btn-primary"
-                {{event.hasRemainingPlaces() ? "" : "disabled data-trigger='hover' data-placement='right' title='Plus de places disponibles' data-content='Il n\'y a plus de places disponibles pour cet événement.'" }}
+                {{event.hasRemainingPlaces() ? "" : "disabled data-trigger='hover' data-placement='right' title='Plus de places disponibles' data-container='body'" }}
             onclick="window.location.href='{{ path('event_inscription', {id: event.id}) }}'">
             S'inscrire
         </button>

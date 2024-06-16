@@ -19,16 +19,19 @@ use App\Repository\UserRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\NotificationEmail;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class PaymentController extends AbstractController {
 
     private EntityManagerInterface $entityManager;
     private UrlGeneratorInterface $generator;
     private MailService $mailService;
-    public function __construct(EntityManagerInterface $entityManager,private LoggerInterface $logger, UrlGeneratorInterface $generator, MailService $mailService) {
+    private $params;
+    public function __construct(EntityManagerInterface $entityManager,private LoggerInterface $logger, UrlGeneratorInterface $generator, MailService $mailService, ParameterBagInterface $params) {
         $this->entityManager = $entityManager;
         $this->generator = $generator;
         $this->mailService = $mailService;
+        $this->params = $params;
     }
 
     #[Route('event/stripe/{id}', name: 'payment')]
@@ -38,7 +41,8 @@ class PaymentController extends AbstractController {
             return $this->redirectToRoute(''); //TODO
         }
 
-        Stripe::setApiKey('sk_test_51PRW8HAXcJK6KQYTkLgg7ryENv8Pm2gN2UdsEjqKZNavv0pe8jf9mHpPWohglEM1Znuflriuhi5XsFsQwaNtjriu00zlLwwIxt');
+        // Stripe::setApiKey('sk_test_51PRW8HAXcJK6KQYTkLgg7ryENv8Pm2gN2UdsEjqKZNavv0pe8jf9mHpPWohglEM1Znuflriuhi5XsFsQwaNtjriu00zlLwwIxt');
+        Stripe::setApiKey($this->params->get('stripe_secret_key'));
 
         //recup user
         $userInterface = $this->getUser(); // Obtenir l'utilisateur authentifié
