@@ -43,7 +43,7 @@ class EventVoter extends Voter
             case self::DELETE:
                 return $this->canDelete($subject, $user);
             case self::CREATE:
-
+                return $this->canCreate($subject, $user);
         }
 
         return false;
@@ -63,5 +63,9 @@ class EventVoter extends Voter
 
     private function canDelete(Event $event, $user) {
         return $user === $event->getCreator();
+    }
+
+    private function canCreate(Event $event, $user) {
+        return $this->security->isGranted('ROLE_USER');
     }
 }
