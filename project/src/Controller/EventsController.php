@@ -179,6 +179,12 @@ class EventsController extends AbstractController {
             'totalItems' => $totalItems,
             'pagesCount' => $pagesCount,
             'currentPage' => $page,
+            'filters' => [
+                'title' => $title,
+                'date' => $date,
+                'placesRemaining' => $placesRemaining,
+                'isPublic' => $isPublic,
+            ],
         ]);
     }
 }

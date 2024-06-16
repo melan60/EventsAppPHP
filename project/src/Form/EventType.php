@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\GreaterThan;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Positive;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
@@ -53,9 +54,15 @@ class EventType extends AbstractType
             ->add('participants_number', NumberType::class, [
                 'label' => 'Nombre de participants',
                 'required' => true,
+                'html5' => true,
                 'constraints' => [
                     new NotBlank(),
-                    new GreaterThan(0)
+                    new GreaterThan(0),
+                    new Positive()
+                ],
+                'attr' => [
+                    'min' => 1,
+                    'step' => 1
                 ]
             ])
             ->add('public', CheckboxType::class, [
@@ -65,9 +72,10 @@ class EventType extends AbstractType
             ->add('price', NumberType::class, [
                 'label' => 'Prix',
                 'required' => true,
-                'scale' => 2,  // Si vous voulez des décimales
+                'html5' => true,
+                'scale' => 2,
                 'attr' => [
-                    'min' => 1,
+                    'min' => 0,
                     'step' => 1
                 ],
                 'empty_data' => 0
