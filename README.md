@@ -34,11 +34,11 @@ Ceci est un projet Symfony qui utilise une base de données SQLite.
 4. Installer les dépendances :
    ```bash
    composer install
-   cp .env .env.local
    ```
 
 5. Création de la base de données :
    ```bash
+   chmod ugo=rwx /var/data.db
    bin/console doctrine:database:create
    bin/console doc:sc:up -f
    bin/console doctrine:fixtures:load
