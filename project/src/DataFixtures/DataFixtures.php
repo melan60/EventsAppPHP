@@ -32,11 +32,46 @@ class DataFixtures extends Fixture {
             $users[] = $user;
         }
 
-        $eventsTitle = ["Initiation boxe", "Initiation volley", "Initiation self-defense", "Initiation rugby", "Initiation aviron"];
-        $eventsDescription = ["Boxe", "Volley", "Self-defense", "Rugby", "Aviron"];
-        $eventsNbParticipants = [5, 12, 2, 22, 10];
-        $eventsPublic = [false, true, true, false, true];
-        $eventsPrice = [0, 0, 0, 10, 20];
+        $eventsTitle = [
+            "Initiation boxe", "Initiation volley", "Initiation self-defense", "Initiation rugby", "Initiation aviron",
+            "Initiation danse", "Initiation escrime", "Initiation tir à l'arc", "Initiation natation", "Initiation escalade",
+            "Initiation yoga", "Initiation karaté", "Initiation judo", "Initiation tennis", "Initiation ping-pong",
+            "Initiation gymnastique", "Initiation crossfit", "Initiation parkour", "Initiation cyclisme", "Initiation athlétisme",
+            "Initiation patinage", "Initiation ski", "Initiation snowboard", "Initiation course à pied", "Initiation haltérophilie"
+        ];
+
+        $eventsDescription = [
+            "Boxe", "Volley", "Self-defense", "Rugby", "Aviron",
+            "Danse", "Escrime", "Tir à l'arc", "Natation", "Escalade",
+            "Yoga", "Karaté", "Judo", "Tennis", "Ping-pong",
+            "Gymnastique", "Crossfit", "Parkour", "Cyclisme", "Athlétisme",
+            "Patinage", "Ski", "Snowboard", "Course à pied", "Haltérophilie"
+        ];
+
+        $eventsNbParticipants = [
+            5, 12, 2, 22, 10,
+            15, 8, 6, 20, 18,
+            25, 7, 11, 30, 4,
+            9, 14, 19, 13, 16,
+            21, 17, 3, 24, 23
+        ];
+
+        $eventsPublic = [
+            false, true, true, false, true,
+            true, false, true, false, true,
+            false, true, true, false, true,
+            true, false, true, false, true,
+            false, true, true, false, true
+        ];
+
+        $eventsPrice = [
+            0, 0, 0, 10, 20,
+            15, 5, 10, 8, 12,
+            6, 0, 0, 7, 25,
+            10, 20, 30, 15, 18,
+            22, 24, 10, 5, 0
+        ];
+
 
         $userAdmin = $users[3];
 
