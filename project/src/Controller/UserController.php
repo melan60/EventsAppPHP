@@ -13,16 +13,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class UserController extends AbstractController {
-//    private $security;
-//
-//    public function __construct(Security $security) {
-//        $this->security = $security;
-//    }
     #[Route('/profile', name: 'user_profile')]
-    public function edit(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, LoggerInterface $logger): Response
-    {
+    #[IsGranted('ROLE_USER')]
+    public function edit(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, LoggerInterface $logger): Response {
         $user = $this->container->get('security.token_storage')->getToken()->getUser();
         $logger->info('UserController::edit');
 
@@ -52,8 +48,8 @@ class UserController extends AbstractController {
     }
 
     #[Route('/user/events', name: 'user_events')]
-    public function myEvent(): Response
-    {
+    #[IsGranted('ROLE_USER')]
+    public function myEvent(): Response {
         $user = $this->container->get('security.token_storage')->getToken()->getUser();
         if (!$user) {
             throw $this->createAccessDeniedException('You must be logged in to view your events.');

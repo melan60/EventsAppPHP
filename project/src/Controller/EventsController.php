@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Security\EventVoter;
 use App\Service\MailService;
 use Psr\Log\LoggerInterface;
 use App\Form\EventType;
@@ -11,10 +12,12 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\NotificationEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Log\Logger;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class EventsController extends AbstractController {
     private MailService $mailService;
@@ -27,8 +30,7 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/', name: 'app_homepage')]
-    public function homepage(): Response
-    {
+    public function homepage(): Response {
         $user = $this->getUser(); // Obtenir l'utilisateur authentifié
 
         return $this->render('events/home.html.twig', [
@@ -38,6 +40,7 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/events/new', name: 'event_new')]
+    #[IsGranted('ROLE_USER')]
     public function new(Request $request): Response {
         $event = new Event();
         $form = $this->createForm(EventType::class, $event);
@@ -45,9 +48,11 @@ class EventsController extends AbstractController {
 
         if ($form->isSubmitted() && $form->isValid()) {
             $event->setCreator($this->getUser());
-//            $user =
+
             $this->entityManager->persist($event);
             $this->entityManager->flush();
+
+            $this->addFlash('success', 'Vous avez créé l\'événement '.$event->getTitle());
 
             return $this->redirectToRoute('event_show', ['id' => $event->getId()]);
         }
@@ -58,10 +63,16 @@ class EventsController extends AbstractController {
 
     #[Route('/events/{id}/edit', name: "event_edit")]
     public function edit(Request $request, Event $event): Response {
+        if (!$this->isGranted(EventVoter::EDIT, $event)) {
+            $this->addFlash('danger', "Vous n'avez pas la permission de modifier cet événement.");
+            return $this->redirectToRoute('event_show', ['id' => $event->getId()]);
+        }
+
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
+            $this->addFlash('success', 'Vous avez modifié l\'événement '.$event->getTitle());
             return $this->redirectToRoute('event_show', ['id' => $event->getId()]);
         }
 
@@ -73,11 +84,17 @@ class EventsController extends AbstractController {
 
     #[Route('/events/{id}/delete', name: 'event_delete')]
     public function delete(Event $event): Response {
+        if (!$this->isGranted(EventVoter::DELETE, $event)) {
+            $this->addFlash('danger', "Vous n'avez pas la permission de supprimer cet événement.");
+            return $this->redirectToRoute('event_show', ['id' => $event->getId()]);
+        }
+
         foreach ($event->getParticipants() as $participant) {
             $event->removeParticipant($participant);
         }
         $this->entityManager->remove($event);
         $this->entityManager->flush();
+        $this->addFlash('danger', 'Vous avez supprimé l\'événement '.$event->getTitle());
 
         return $this->redirectToRoute('list_events');
     }
@@ -96,6 +113,7 @@ class EventsController extends AbstractController {
                 $this->entityManager->flush();
 
                 $this->mailService->sendEmail($user->getEmail(), 'Inscription à l\'événement', 'Vous vous êtes inscrit à l\'événement ' .$event->getTitle());
+                $this->addFlash('success', 'Vous vous êtes inscrit à l\'événement '.$event->getTitle());
 
                 return $this->redirectToRoute('user_events');
             }else{
@@ -122,6 +140,7 @@ class EventsController extends AbstractController {
         $this->entityManager->flush();
 
         $this->mailService->sendEmail($user->getEmail(), 'Désinscription à l\'événement', 'Vous vous êtes désinscrit de l\'événement ' .$event->getTitle());
+        $this->addFlash('danger', 'Vous vous êtes désinscrit de l\'événement '.$event->getTitle());
 
         return $this->redirectToRoute('user_events');
     }
@@ -129,7 +148,10 @@ class EventsController extends AbstractController {
     #[Route('/events/{id}', name: 'event_show')]
     public function show(Event $event): Response {
         // Vérification des accès
-        $this->denyAccessUnlessGranted('view_details_event', $event);
+        if (!$this->isGranted(EventVoter::VIEW, $event)) {
+            $this->addFlash('danger', "Vous n'avez pas la permission de visionner cet événement, veuillez vous connecter.");
+            return $this->redirectToRoute('app_login');
+        }
 
         return $this->render('events/show.html.twig', [
             'event' => $event,

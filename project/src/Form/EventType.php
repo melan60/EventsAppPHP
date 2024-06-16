@@ -64,11 +64,13 @@ class EventType extends AbstractType
             ])
             ->add('price', NumberType::class, [
                 'label' => 'Prix',
+                'required' => true,
                 'scale' => 2,  // Si vous voulez des décimales
                 'attr' => [
                     'min' => 1,
                     'step' => 1
                 ],
+                'empty_data' => 0
             ])
             ->add('add', SubmitType::class, [
                 'label' => 'Valider',

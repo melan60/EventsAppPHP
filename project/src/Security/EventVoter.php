@@ -11,6 +11,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class EventVoter extends Voter
 {
     const VIEW = 'view_details_event';
+    const EDIT = 'edit_details_event';
+    const DELETE = 'delete_details_event';
+    const CREATE = 'create_new_event';
 
     private $security;
 
@@ -20,7 +23,7 @@ class EventVoter extends Voter
     }
 
     protected function supports(string $attribute, $subject) : bool{
-        return in_array($attribute, [self::VIEW])
+        return in_array($attribute, [self::VIEW, self::EDIT, self::DELETE, self::CREATE])
             && $subject instanceof \App\Entity\Event;
     }
 
@@ -35,6 +38,12 @@ class EventVoter extends Voter
         switch ($attribute) {
             case self::VIEW:
                 return $this->canView($subject, $user);
+            case self::EDIT:
+                return $this->canEdit($subject, $user);
+            case self::DELETE:
+                return $this->canDelete($subject, $user);
+            case self::CREATE:
+
         }
 
         return false;
@@ -46,5 +55,13 @@ class EventVoter extends Voter
         }
 
         return $user !== null; // Seuls les utilisateurs connectés peuvent voir les événements privés
+    }
+
+    private function canEdit(Event $event, $user) {
+        return $user === $event->getCreator();
+    }
+
+    private function canDelete(Event $event, $user) {
+        return $user === $event->getCreator();
     }
 }
