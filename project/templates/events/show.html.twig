@@ -1,72 +1,75 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ event.title }} - Event Details{% endblock %}
+{% block title %}{{ event.title }} - Détails de l'événement{% endblock %}
 
 {% block body %}
-
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label }}" id="alert">
-                {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{{ event.title }}</h3>
+        </div>
+        <div class="card-body">
+            <p class="card-text"><strong>Description:</strong><br>{{ event.description }}</p>
+            <p class="card-text"><strong>Date et horaire:</strong><br>{{ event.date|date('Y-m-d H:i') }}</p>
+            <p class="card-text"><strong>Participants:</strong> {{ event.getReservedPlaces() }} / {{ event.participantsNumber }}</p>
+            <p class="card-text"><strong>Prix :</strong> {{ event.price }}€</p>
+            <p class="card-text"><strong>Public :</strong> {{ event.public ? 'Oui' : 'Non' }}</p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+            {% if not event.hasParticipant(app.user) %}
+                <button class="btn btn-primary {{ event.hasRemainingPlaces() ? '' : 'disabled' }}"
+                        {% if not event.hasRemainingPlaces() %}
+                            data-trigger="hover" title="Plus de places disponibles" data-placement="top"
+                        {% endif %}
+                        onclick="window.location.href='{{ path('event_inscription', {id: event.id}) }}'">
+                    S'inscrire
                 </button>
-            </div>
-        {% endfor %}
-    {% endfor %}
-     <h1>Détail de l'événement : {{ event.title }}</h1>
-    <p>{{ event.description }}</p>
-    <p><strong>Date et horaire:</strong> {{ event.date|date('Y-m-d H:i') }}</p>
-    <p><strong>Participants:</strong> {{event.getReservedPlaces()}} / {{ event.participantsNumber }}</p>
-    <p><strong>Prix : </strong>{{ event.price }}€</p>
-    <p><strong>Public : </strong> {{ event.public ? 'Oui' : 'Non' }} </p>
-    {% if not event.hasParticipant(app.user) %}
-        <button
-            class="btn btn-primary"
-                {{event.hasRemainingPlaces() ? "" : "disabled data-trigger='hover' data-placement='right' title='Plus de places disponibles' data-container='body'" }}
-            onclick="window.location.href='{{ path('event_inscription', {id: event.id}) }}'">
-            S'inscrire
-        </button>
-    {% endif %}
+            {% endif %}
 
-    {% if event.creator == app.user %}
-        <a href="{{ path('event_edit', { id: event.id }) }}" class="btn btn-warning">
-            Modifier
-            <i class="bi bi-pencil-square"></i>
-        </a>
+            {% if event.creator == app.user %}
+                <div>
+                    <a href="{{ path('event_edit', { id: event.id }) }}" class="btn btn-warning">
+                        Modifier
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
 
-        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modalDelete">
-            Supprimer
-            <i class="bi bi-trash"></i>
-        </button>
+                    <button type="button" class="btn btn-danger ml-2" data-toggle="modal" data-target="#modalDelete">
+                        Supprimer
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
 
-        <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="modalDeleteLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalDeleteLabel">Confirmer la suppression</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        Êtes-vous sûr de vouloir supprimer cet événement ?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                        <a href="{{ path('event_delete', { id: event.id }) }}" class="btn btn-danger"> Supprimer </a>
+                <!-- Modal -->
+                <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="modalDeleteLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalDeleteLabel">Confirmer la suppression</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Êtes-vous sûr de vouloir supprimer cet événement ?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                <a href="{{ path('event_delete', { id: event.id }) }}" class="btn btn-danger">Supprimer</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+                <!-- End Modal -->
+            {% endif %}
         </div>
-
-    {% endif %}
+    </div>
 
     <script>
-        setTimeout(function() {
+        // Masquer l'alerte après 5 secondes
+        setTimeout(function () {
             var alertMessage = document.getElementById('alert');
-            alertMessage.style.display = 'none';
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+            }
         }, 5000);
     </script>
-
 {% endblock %}

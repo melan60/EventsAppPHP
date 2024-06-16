@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Security\EventVoter;
 use App\Service\MailService;
+use App\Service\PlacesRestantesService;
 use Psr\Log\LoggerInterface;
 use App\Form\EventType;
 use App\Repository\EventRepository;
@@ -30,12 +31,17 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/', name: 'app_homepage')]
-    public function homepage(): Response {
+    public function homepage(PlacesRestantesService $placesRestantesService): Response {
         $user = $this->getUser(); // Obtenir l'utilisateur authentifié
+
+        $events = $this->repo->findAll();
+        foreach ($events as $event) {
+            $event->remainingPlaces = $placesRestantesService->calculPlacesRestantes($event);
+        }
 
         return $this->render('events/home.html.twig', [
             'user' => $user,
-            'events' => $this->repo->findAll()
+            'events' => $events
         ]);
     }
 
@@ -164,7 +170,7 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/events', name: 'list_events')]
-    public function listEvents(Request $request): Response
+    public function listEvents(Request $request, PlacesRestantesService $placesRestantesService): Response
     {
         $title = $request->query->get('title');
         $date = $request->query->get('date');
@@ -178,6 +184,11 @@ class EventsController extends AbstractController {
         $events_pagination = $this->repo->findByFilters($title, $date, $placesRemaining, $isPublic, $page, $limit);
         $totalItems = count($events_pagination);
         $pagesCount = ceil($totalItems / $limit);
+
+        foreach ($events_pagination as $event) {
+            $event->remainingPlaces = $placesRestantesService->calculPlacesRestantes($event);
+        }
+
         // 'events' => $repo->findAllPagination(1, 3)
         return $this->render('events/show_filter_event.html.twig', [
             'events' => $events_pagination,
