@@ -40,11 +40,16 @@ class EventsController extends AbstractController {
     }
 
     #[Route('/events/new', name: 'event_new')]
-    #[IsGranted('ROLE_USER')]
     public function new(Request $request): Response {
         $event = new Event();
+        if (!$this->isGranted(EventVoter::CREATE, $event)) {
+            $this->addFlash('danger', "Vous n'avez pas la permission de créer un événement, veuillez vous connecter.");
+            return $this->redirectToRoute('app_login');
+        }
+        
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
+        
 
         if ($form->isSubmitted() && $form->isValid()) {
             $event->setCreator($this->getUser());
